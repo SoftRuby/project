@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import WebcamCapture from './components/WebcamCapture';
 import PredictionBox from './components/PredictionBox';
 import Footer from './components/Footer';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, WifiOff, Wifi } from 'lucide-react';
 
 function App() {
   const [prediction, setPrediction] = useState(null);
@@ -14,6 +14,35 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sentence, setSentence] = useState('');
+  const [backendStatus, setBackendStatus] = useState('checking'); // 'checking', 'online', 'offline'
+
+  // Check backend connectivity on mount and periodically
+  useEffect(() => {
+    const checkBackendStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/', {
+          method: 'GET',
+          signal: AbortSignal.timeout(5000), // 5 second timeout
+        });
+        
+        if (response.ok) {
+          setBackendStatus('online');
+        } else {
+          setBackendStatus('offline');
+        }
+      } catch (err) {
+        setBackendStatus('offline');
+      }
+    };
+
+    // Check immediately
+    checkBackendStatus();
+
+    // Check every 10 seconds
+    const interval = setInterval(checkBackendStatus, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCapture = async (imageSrc) => {
     setIsLoading(true);
@@ -36,7 +65,8 @@ function App() {
       });
 
       if (!apiResponse.ok) {
-        throw new Error(`HTTP error! status: ${apiResponse.status}`);
+        const errorData = await apiResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error (${apiResponse.status}). Please try again.`);
       }
 
       const data = await apiResponse.json();
@@ -49,9 +79,28 @@ function App() {
       setPrediction(data.prediction);
       setConfidence(data.confidence);
       setModelUsed(data.model_used);
+      
+      // Update backend status on successful request
+      setBackendStatus('online');
     } catch (err) {
       console.error('Prediction error:', err);
-      setError(err.message || 'Failed to get prediction. Make sure the backend server is running on port 5000.');
+      
+      // Provide more detailed error messages
+      let errorMessage = err.message;
+      
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setBackendStatus('offline');
+        errorMessage = '❌ Cannot connect to backend server. Please ensure:\n\n' +
+                      '1. The backend server is running (python backend/app.py)\n' +
+                      '2. The server is accessible at http://localhost:5000\n' +
+                      '3. No firewall is blocking the connection';
+      } else if (err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
+        setBackendStatus('offline');
+        errorMessage = '🌐 Network error: Unable to reach the backend server.\n\n' +
+                      'Make sure the backend is running on http://localhost:5000';
+      }
+      
+      setError(errorMessage);
       setPrediction(null);
     } finally {
       setIsLoading(false);
@@ -78,6 +127,38 @@ function App() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Backend Status Indicator */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full ${
+            backendStatus === 'online' 
+              ? 'bg-green-500/20 border border-green-500' 
+              : backendStatus === 'offline'
+              ? 'bg-red-500/20 border border-red-500'
+              : 'bg-yellow-500/20 border border-yellow-500'
+          }`}>
+            {backendStatus === 'online' ? (
+              <>
+                <Wifi className="h-4 w-4 text-green-400" />
+                <span className="text-green-300 text-sm font-medium">Backend Connected</span>
+              </>
+            ) : backendStatus === 'offline' ? (
+              <>
+                <WifiOff className="h-4 w-4 text-red-400" />
+                <span className="text-red-300 text-sm font-medium">Backend Offline</span>
+              </>
+            ) : (
+              <>
+                <div className="h-4 w-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-yellow-300 text-sm font-medium">Checking Connection...</span>
+              </>
+            )}
+          </div>
+        </motion.div>
+
         {/* Error Alert */}
         {error && (
           <motion.div
@@ -85,11 +166,11 @@ function App() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 bg-red-500/20 border-2 border-red-500 rounded-xl p-4 backdrop-blur-sm"
           >
-            <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-red-400 flex-shrink-0" />
-              <div>
-                <p className="text-red-200 font-semibold">Error</p>
-                <p className="text-red-300 text-sm">{error}</p>
+            <div className="flex items-start space-x-3">
+              <AlertCircle className="h-6 w-6 text-red-400 flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <p className="text-red-200 font-semibold mb-2">Error</p>
+                <p className="text-red-300 text-sm whitespace-pre-line">{error}</p>
               </div>
             </div>
           </motion.div>
