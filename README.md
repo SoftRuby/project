@@ -78,7 +78,35 @@ sign-language-translator/
 - **Python** (v3.8 or higher) - [Download](https://www.python.org/)
 - **pip** - Python package manager (comes with Python)
 
-### Installation
+### ⚡ Quick Start (Recommended)
+
+The **easiest way** to run the application with automated setup:
+
+#### Windows
+Simply double-click **`start_all.bat`** or run:
+```bash
+start_all.bat
+```
+
+#### Linux/Mac
+```bash
+./start_all.sh
+```
+
+**That's it!** The script will:
+- ✅ Automatically check and install all requirements (only if needed)
+- ✅ Start both backend and frontend servers
+- ✅ Open the application in your browser
+
+**First run takes ~3 minutes (installation). Next runs take ~10 seconds!**
+
+See [STARTUP_GUIDE.md](STARTUP_GUIDE.md) for detailed information about the startup scripts.
+
+---
+
+### 📖 Manual Setup (Alternative)
+
+If you prefer manual setup:
 
 #### 1. Clone the Repository
 
@@ -113,9 +141,23 @@ npm install
 
 ## 🎮 Running the Application
 
+### ⚡ Automated Method (Recommended)
+
+**Windows:**
+```bash
+start_all.bat
+```
+
+**Linux/Mac:**
+```bash
+./start_all.sh
+```
+
+### 📖 Manual Method
+
 You'll need to run both the backend and frontend servers simultaneously.
 
-### Terminal 1 - Backend Server
+**Terminal 1 - Backend Server:**
 
 ```bash
 cd backend
@@ -124,7 +166,7 @@ python app.py
 
 The Flask API will start on `http://localhost:5000`
 
-### Terminal 2 - Frontend Server
+**Terminal 2 - Frontend Server:**
 
 ```bash
 cd frontend
@@ -135,7 +177,33 @@ The React app will start on `http://localhost:3000`
 
 Open your browser and navigate to `http://localhost:3000`
 
+### 🛑 Stopping the Application
+
+**Windows:**
+```bash
+stop_all.bat
+```
+
+**Linux/Mac:**
+```bash
+./stop_all.sh
+```
+
+Or press `Ctrl+C` in the terminal/command windows.
+
 ## 📖 Usage Guide
+
+### Starting the Application
+
+1. **Run the startup script:**
+   - Windows: Double-click `start_all.bat`
+   - Linux/Mac: Run `./start_all.sh`
+
+2. **Wait for servers to start** (~10 seconds)
+
+3. **Browser opens automatically** to http://localhost:3000
+
+### Using the Application
 
 1. **Allow Camera Access** - Grant webcam permissions when prompted
 2. **Select AI Model** - Choose between VGG16 or ResNet50
@@ -144,6 +212,11 @@ Open your browser and navigate to `http://localhost:3000`
 5. **Listen** - Click the speaker icon to hear the translation
 6. **Build Sentences** - Click "Add to Sentence" to accumulate multiple signs
 7. **Speak Sentence** - Convert the entire sentence to speech
+
+### Stopping the Application
+
+- Windows: Run `stop_all.bat` or close the server windows
+- Linux/Mac: Run `./stop_all.sh` or press `Ctrl+C`
 
 ## 🎯 Supported ASL Gestures
 

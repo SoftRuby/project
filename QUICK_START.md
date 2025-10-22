@@ -2,7 +2,33 @@
 
 Get your Sign Language Translator up and running in 5 minutes!
 
-## Prerequisites Check
+## ⚡ Super Quick Start (10 Seconds!)
+
+### Windows
+```bash
+start_all.bat
+```
+
+### Linux/Mac
+```bash
+./start_all.sh
+```
+
+**That's it!** The script automatically handles everything:
+- ✅ Checks prerequisites
+- ✅ Installs requirements (only if needed)
+- ✅ Starts both servers
+- ✅ Opens browser
+
+**See [STARTUP_GUIDE.md](STARTUP_GUIDE.md) for detailed information.**
+
+---
+
+## 📖 Manual Setup (Alternative)
+
+If you prefer to understand each step:
+
+### Prerequisites Check
 
 Before starting, ensure you have:
 - ✅ Node.js (v18+): Run `node --version`
